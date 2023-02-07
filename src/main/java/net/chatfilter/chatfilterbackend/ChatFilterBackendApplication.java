@@ -9,5 +9,4 @@ public class ChatFilterBackendApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ChatFilterBackendApplication.class, args);
 	}
-
 }
