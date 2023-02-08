@@ -10,14 +10,16 @@ import java.util.UUID;
 public class Organization {
     private final UUID uuid;
     private final UUID owner;
+    private String name;
     private HashMap<UUID, OrganizationMember> members;
     private HashMap<LocalTime, Integer> checks;
     private ApiKey key;
     private String planName;
 
-    public Organization(UUID uuid, UUID owner) {
+    public Organization(UUID uuid, UUID owner, String name) {
         this.uuid = uuid;
         this.owner = owner;
+        this.name = name;
         members = new HashMap<>();
         checks = new HashMap<>();
         key = new ApiKey(uuid);
@@ -29,6 +31,14 @@ public class Organization {
 
     public UUID getOwner() {
         return owner;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public HashMap<UUID, OrganizationMember> getMembers() {
