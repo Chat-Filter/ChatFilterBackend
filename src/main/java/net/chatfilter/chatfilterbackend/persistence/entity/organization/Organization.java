@@ -2,6 +2,8 @@ package net.chatfilter.chatfilterbackend.persistence.entity.organization;
 
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.api.ApiKey;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.OrganizationMember;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationPermission;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationRole;
 
 import java.time.LocalTime;
 import java.util.HashMap;
@@ -12,6 +14,7 @@ public class Organization {
     private final UUID owner;
     private String name;
     private HashMap<UUID, OrganizationMember> members;
+    private HashMap<String, OrganizationRole> roles;
     private HashMap<LocalTime, Integer> checks;
     private ApiKey key;
     private String planName;
@@ -71,5 +74,10 @@ public class Organization {
 
     public void setPlanName(String planName) {
         this.planName = planName;
+    }
+
+    public boolean hasPermission(OrganizationMember member, OrganizationPermission permission) {
+        return roles.get(member.getRole()).getPermissions().contains(permission) ||
+                roles.get(member.getRole()).getPermissions().contains(OrganizationPermission.ALL_PERMISSIONS);
     }
 }
