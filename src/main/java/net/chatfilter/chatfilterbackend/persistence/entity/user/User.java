@@ -8,13 +8,15 @@ public class User {
 
     private final UUID uuid;
     private String email;
+    private String password;
     private String name;
     private String lastName;
     private List<UUID> organizations;
 
-    public User(UUID uuid, String email, String name, String lastName) {
+    public User(UUID uuid, String email, String password, String name, String lastName) {
         this.uuid = uuid;
         this.email = email;
+        this.password = password;
         this.name = name;
         this.lastName = lastName;
         organizations = new ArrayList<>();
@@ -30,6 +32,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getName() {
