@@ -24,6 +24,7 @@ public class Organization {
         this.owner = owner;
         this.name = name;
         members = new HashMap<>();
+        roles = new HashMap<>();
         checks = new HashMap<>();
         key = new ApiKey(uuid);
     }

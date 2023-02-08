@@ -1,4 +1,4 @@
-package net.chatfilter.chatfilterbackend.persistence.service;
+package net.chatfilter.chatfilterbackend.persistence.service.organization;
 
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.Organization;
 import net.chatfilter.chatfilterbackend.persistence.repository.OrganizationRepository;
