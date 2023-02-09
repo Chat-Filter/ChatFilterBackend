@@ -40,6 +40,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserDTO> register(String email, String password, String name, String lastName) {
+        if (userService.getByEmail(email) != null) {
+            return ResponseEntity.status(409).build();
+        }
+
         UUID userUUID = UUID.randomUUID();
         while (userService.getByUUID(userUUID) != null) {
             userUUID = UUID.randomUUID();
