@@ -2,6 +2,7 @@ package net.chatfilter.chatfilterbackend.persistence.service.user;
 
 import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
 import net.chatfilter.chatfilterbackend.persistence.repository.UserRepository;
+import net.chatfilter.chatfilterbackend.web.security.user.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,8 @@ public class UserService {
 
     @Autowired
     private UserRepository repository;
+    @Autowired
+    private AuthUtil authUtil;
 
     public User create(User user) {
         return repository.insert(user);
@@ -29,13 +32,13 @@ public class UserService {
         return repository.save(user);
     }
 
-    public UserAuthResult auth(String email, String password) {
+    public UserAuthResult auth(String email, String rawPassword) {
         User user = getByEmail(email);
         if (user == null) {
             return UserAuthResult.UNKNOWN_USER;
         }
 
-        if (user.getPassword().equals(password)) {
+        if (authUtil.passwordMatches(rawPassword, user.getEncodedPassword())) {
             return UserAuthResult.SUCCESS;
         }
 

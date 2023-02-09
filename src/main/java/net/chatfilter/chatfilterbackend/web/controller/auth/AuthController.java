@@ -5,6 +5,7 @@ import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
 import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserAuthResult;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
+import net.chatfilter.chatfilterbackend.web.security.user.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,8 @@ public class AuthController {
     private UserService userService;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private AuthUtil authUtil;
 
     @PostMapping("/login")
     public ResponseEntity<UserDTO> login(String email, String password) {
@@ -49,6 +52,7 @@ public class AuthController {
             userUUID = UUID.randomUUID();
         }
 
+        password = authUtil.encodePassword(password);
         User user = new User(userUUID, email, password, name, lastName);
         UserDTO userDTO = userMapper.toUserDTO(userService.create(user));
         return ResponseEntity.ok(userDTO);
