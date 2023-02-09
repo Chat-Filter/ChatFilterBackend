@@ -4,5 +4,6 @@ public enum OrganizationPermission {
     ALL_PERMISSIONS,
     UPDATE_NAME,
     INVITE_MEMBER,
-    SEE_STATISTICS,
+    DELETE_INVITE,
+    SEE_STATISTICS
 }

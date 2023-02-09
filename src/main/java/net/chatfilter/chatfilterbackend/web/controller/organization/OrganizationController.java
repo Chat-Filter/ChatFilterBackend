@@ -28,17 +28,17 @@ public class OrganizationController {
     private UserSecurityManager userSecurityManager;
 
     @GetMapping("/get")
-    public ResponseEntity<Organization> getOrganization(UserKey key, UUID uuid) {
-        if (!userSecurityManager.containsUser(key)) {
+    public ResponseEntity<Organization> getOrganization(UserKey key, UUID organizationUUID) {
+        if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
         User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(uuid)) {
+        if (!user.getOrganizations().contains(organizationUUID)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(uuid);
+        Organization organization = organizationService.getByUUID(organizationUUID);
         OrganizationRole role = organizationRoleService.get(organization.getMembers().get(key.getBaseUUID()).getRole());
         if (!role.hasPermission(OrganizationPermission.SEE_STATISTICS)) {
             // TODO: Hide statistics
@@ -48,17 +48,17 @@ public class OrganizationController {
     }
 
     @PostMapping("/update/name")
-    public ResponseEntity<Organization> updateName(UserKey key, UUID uuid, String name) {
-        if (!userSecurityManager.containsUser(key)) {
+    public ResponseEntity<Organization> updateName(UserKey key, UUID organizationUUID, String name) {
+        if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
         User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(uuid)) {
+        if (!user.getOrganizations().contains(organizationUUID)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(uuid);
+        Organization organization = organizationService.getByUUID(organizationUUID);
         OrganizationRole role = organizationRoleService.get(organization.getMembers().get(key.getBaseUUID()).getRole());
         if (!role.hasPermission(OrganizationPermission.UPDATE_NAME)) {
             return ResponseEntity.status(403).build();
@@ -70,5 +70,80 @@ public class OrganizationController {
     }
 
     @PostMapping("/update/invite-member")
+    public ResponseEntity<Organization> inviteMember(UserKey key, UUID organizationUUID, String invitedEmail) {
+        if (!userSecurityManager.isValid(key)) {
+            return ResponseEntity.status(401).build();
+        }
 
+        User user = userService.getByUUID(key.getBaseUUID());
+        if (!user.getOrganizations().contains(organizationUUID)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Organization organization = organizationService.getByUUID(organizationUUID);
+        OrganizationRole role = organizationRoleService.get(organization.getMembers().get(key.getBaseUUID()).getRole());
+        if (!role.hasPermission(OrganizationPermission.INVITE_MEMBER)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        User invited = userService.getByEmail(invitedEmail);
+        if (invited == null) {
+            return ResponseEntity.status(404).build();
+        }
+
+        invited.getPendingOrganizationInvites().add(organizationUUID);
+        organization.getPendingInvites().add(invited.getUuid());
+        userService.update(invited);
+        organization = organizationService.update(organization);
+        return ResponseEntity.ok(organization);
+    }
+
+    @PostMapping("/update/delete-invite")
+    public ResponseEntity<Organization> deleteInvite(UserKey key, UUID organizationUUID, UUID invitedUUID) {
+        if (!userSecurityManager.isValid(key)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userService.getByUUID(key.getBaseUUID());
+        if (!user.getOrganizations().contains(organizationUUID)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Organization organization = organizationService.getByUUID(organizationUUID);
+        OrganizationRole role = organizationRoleService.get(organization.getMembers().get(key.getBaseUUID()).getRole());
+        if (!role.hasPermission(OrganizationPermission.DELETE_INVITE)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        User invited = userService.getByUUID(invitedUUID);
+        if (invited == null) {
+            return ResponseEntity.status(404).build();
+        }
+
+        invited.getPendingOrganizationInvites().remove(organizationUUID);
+        organization.getPendingInvites().remove(invitedUUID);
+        userService.update(invited);
+        organization = organizationService.update(organization);
+        return ResponseEntity.ok(organization);
+    }
+
+    @PostMapping("/join-organization")
+    public ResponseEntity<Organization> joinOrganization(UserKey key, UUID organizationUUID) {
+        if (!userSecurityManager.isValid(key)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userService.getByUUID(key.getBaseUUID());
+        if (!user.getOrganizations().contains(organizationUUID)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        if (!user.getPendingOrganizationInvites().contains(organizationUUID)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Organization organization = organizationService.getByUUID(organizationUUID);
+        if (organization == null || !organization.getPendingInvites().contains(user.getUuid())) {
+        }
+    }
 }
