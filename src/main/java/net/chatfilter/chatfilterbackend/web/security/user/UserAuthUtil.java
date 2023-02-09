@@ -5,10 +5,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AuthUtil {
+public class UserAuthUtil {
     private PasswordEncoder passwordEncoder;
 
-    public AuthUtil() {
+    public UserAuthUtil() {
         this.passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 

@@ -4,9 +4,9 @@ import java.util.UUID;
 
 public class OrganizationMember {
     private final UUID uuid;
-    private String role;
+    private UUID role;
 
-    public OrganizationMember(UUID uuid, String role) {
+    public OrganizationMember(UUID uuid, UUID role) {
         this.uuid = uuid;
         this.role = role;
     }
@@ -15,11 +15,11 @@ public class OrganizationMember {
         return uuid;
     }
 
-    public String getRole() {
+    public UUID getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(UUID role) {
         this.role = role;
     }
 }

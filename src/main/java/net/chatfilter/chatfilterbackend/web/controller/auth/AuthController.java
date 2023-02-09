@@ -1,11 +1,11 @@
 package net.chatfilter.chatfilterbackend.web.controller.auth;
 
-import net.chatfilter.chatfilterbackend.domain.dto.UserDTO;
 import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
+import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
 import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserAuthResult;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
-import net.chatfilter.chatfilterbackend.web.security.user.AuthUtil;
+import net.chatfilter.chatfilterbackend.web.security.user.UserAuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,15 +23,17 @@ public class AuthController {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    private AuthUtil authUtil;
+    private UserAuthUtil userAuthUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(String email, String password) {
+    public ResponseEntity<UserKey> login(String email, String password) {
         UserAuthResult result = userService.auth(email, password);
 
         switch (result) {
             case SUCCESS -> {
-                return ResponseEntity.ok(userMapper.toUserDTO(userService.getByEmail(email)));
+                User user = userService.getByEmail(email);
+                UserKey userKey = new UserKey(user.getUuid());
+                return ResponseEntity.ok(userKey);
             }
             case UNKNOWN_USER, WRONG_PASSWORD -> {
                 return ResponseEntity.status(401).build();
@@ -42,7 +44,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> register(String email, String password, String name, String lastName) {
+    public ResponseEntity<UserKey> register(String email, String password, String name, String lastName) {
         if (userService.getByEmail(email) != null) {
             return ResponseEntity.status(409).build();
         }
@@ -52,9 +54,9 @@ public class AuthController {
             userUUID = UUID.randomUUID();
         }
 
-        password = authUtil.encodePassword(password);
+        password = userAuthUtil.encodePassword(password);
         User user = new User(userUUID, email, password, name, lastName);
-        UserDTO userDTO = userMapper.toUserDTO(userService.create(user));
-        return ResponseEntity.ok(userDTO);
+        UserKey userKey = new UserKey(user.getUuid());
+        return ResponseEntity.ok(userKey);
     }
 }
