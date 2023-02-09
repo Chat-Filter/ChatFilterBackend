@@ -21,4 +21,10 @@ public abstract class Key {
     public UUID getBaseUUID() {
         return UUID.fromString(key.split("\\.")[0]);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        Key objectKey = (Key) obj;
+        return key.equals(objectKey.getKey());
+    }
 }

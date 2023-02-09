@@ -12,6 +12,7 @@ public class User {
     private String name;
     private String lastName;
     private List<UUID> organizations;
+    private List<UUID> pendingOrganizationInvites;
 
     public User(UUID uuid, String email, String encodedPassword, String name, String lastName) {
         this.uuid = uuid;
@@ -20,6 +21,7 @@ public class User {
         this.name = name;
         this.lastName = lastName;
         organizations = new ArrayList<>();
+        pendingOrganizationInvites = new ArrayList<>();
     }
 
     public UUID getUuid() {
@@ -64,5 +66,13 @@ public class User {
 
     public void setOrganizations(List<UUID> organizations) {
         this.organizations = organizations;
+    }
+
+    public List<UUID> getPendingOrganizationInvites() {
+        return pendingOrganizationInvites;
+    }
+
+    public void setPendingOrganizationInvites(List<UUID> pendingOrganizationInvites) {
+        this.pendingOrganizationInvites = pendingOrganizationInvites;
     }
 }

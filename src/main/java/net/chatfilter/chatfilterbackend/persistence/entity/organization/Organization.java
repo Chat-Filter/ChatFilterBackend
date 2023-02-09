@@ -4,7 +4,9 @@ import net.chatfilter.chatfilterbackend.persistence.entity.organization.key.ApiK
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.OrganizationMember;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class Organization {
@@ -12,6 +14,7 @@ public class Organization {
     private final UUID owner;
     private String name;
     private HashMap<UUID, OrganizationMember> members;
+    private List<UUID> pendingInvites;
     private HashMap<LocalTime, Integer> checks;
     private ApiKey key;
     private String planName;
@@ -20,9 +23,10 @@ public class Organization {
         this.uuid = uuid;
         this.owner = owner;
         this.name = name;
-        members = new HashMap<>();
-        checks = new HashMap<>();
-        key = new ApiKey(uuid);
+        this.members = new HashMap<>();
+        this.pendingInvites = new ArrayList<>();
+        this.checks = new HashMap<>();
+        this.key = new ApiKey(uuid);
     }
 
     public UUID getUuid() {
@@ -47,6 +51,14 @@ public class Organization {
 
     public void setMembers(HashMap<UUID, OrganizationMember> members) {
         this.members = members;
+    }
+
+    public List<UUID> getPendingInvites() {
+        return pendingInvites;
+    }
+
+    public void setPendingInvites(List<UUID> pendingInvites) {
+        this.pendingInvites = pendingInvites;
     }
 
     public HashMap<LocalTime, Integer> getChecks() {

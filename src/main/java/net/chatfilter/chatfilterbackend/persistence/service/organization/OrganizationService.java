@@ -21,8 +21,8 @@ public class OrganizationService {
         return repository.findById(uuid).orElse(null);
     }
 
-    public void update(Organization organization) {
-        repository.save(organization);
+    public Organization update(Organization organization) {
+        return repository.save(organization);
     }
 
     public void delete(UUID uuid) {

@@ -26,7 +26,7 @@ public class UserController {
 
     @GetMapping("/get")
     public ResponseEntity<UserDTO> getUser(UserKey key) {
-        if (!userSecurityManager.containsUser(key)) {
+        if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
@@ -36,15 +36,15 @@ public class UserController {
 
     @PostMapping("/update")
     public ResponseEntity<UserDTO> updateUser(UserKey key, UserDTO userDTO) {
-        if (!userSecurityManager.containsUser(key)) {
+        if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
         User user = userService.getByUUID(key.getBaseUUID());
         user.setName(userDTO.getName());
         user.setLastName(userDTO.getLastName());
-        userService.update(user);
+        user = userService.update(user);
 
-        return ResponseEntity.ok(userDTO);
+        return ResponseEntity.ok(userMapper.toUserDTO(user));
     }
 }

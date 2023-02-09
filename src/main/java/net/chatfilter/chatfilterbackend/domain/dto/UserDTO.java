@@ -10,13 +10,15 @@ public class UserDTO {
     private String name;
     private String lastName;
     private List<UUID> organizations;
+    private List<UUID> pendingOrganizationInvites;
 
-    public UserDTO(UUID uuid, String email, String name, String lastName, List<UUID> organizations) {
+    public UserDTO(UUID uuid, String email, String name, String lastName, List<UUID> organizations, List<UUID> pendingOrganizationInvites) {
         this.uuid = uuid;
         this.email = email;
         this.name = name;
         this.lastName = lastName;
         this.organizations = organizations;
+        this.pendingOrganizationInvites = pendingOrganizationInvites;
     }
 
     public UUID getUuid() {
@@ -53,5 +55,13 @@ public class UserDTO {
 
     public void setOrganizations(List<UUID> organizations) {
         this.organizations = organizations;
+    }
+
+    public List<UUID> getPendingOrganizationInvites() {
+        return pendingOrganizationInvites;
+    }
+
+    public void setPendingOrganizationInvites(List<UUID> pendingOrganizationInvites) {
+        this.pendingOrganizationInvites = pendingOrganizationInvites;
     }
 }
