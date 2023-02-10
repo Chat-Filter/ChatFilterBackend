@@ -13,8 +13,8 @@ public class OrganizationService {
     @Autowired
     private OrganizationRepository repository;
 
-    public void create(Organization organization) {
-        repository.insert(organization);
+    public Organization create(Organization organization) {
+        return repository.insert(organization);
     }
 
     public Organization getByUUID(UUID uuid) {

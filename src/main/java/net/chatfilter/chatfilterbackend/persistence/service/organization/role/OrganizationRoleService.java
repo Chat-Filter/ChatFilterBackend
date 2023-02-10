@@ -11,7 +11,11 @@ public class OrganizationRoleService {
     @Autowired
     private OrganizationRoleRepository repository;
 
-    public OrganizationRole get(UUID uuid) {
+    public OrganizationRole getByUUID(UUID uuid) {
         return repository.findById(uuid).orElse(null);
+    }
+
+    public OrganizationRole getByName(String name) {
+        return repository.getByName(name);
     }
 }
