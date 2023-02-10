@@ -33,11 +33,6 @@ public class OrganizationController {
     @Autowired
     private UserMapper userMapper;
 
-    /*
-    * TODO:
-    *  - getStatistics (?)
-     */
-
     @GetMapping("/get")
     public ResponseEntity<Organization> getOrganization(UserKey key, UUID organizationUUID) {
         if (!userSecurityManager.isValid(key)) {
