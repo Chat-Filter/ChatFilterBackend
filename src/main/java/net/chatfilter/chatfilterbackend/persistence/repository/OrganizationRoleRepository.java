@@ -6,4 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.UUID;
 
 public interface OrganizationRoleRepository extends MongoRepository<OrganizationRole, UUID> {
+
+    OrganizationRole getByName(String name);
 }
