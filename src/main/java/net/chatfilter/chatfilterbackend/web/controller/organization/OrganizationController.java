@@ -1,6 +1,8 @@
 package net.chatfilter.chatfilterbackend.web.controller.organization;
 
+import net.chatfilter.chatfilterbackend.ChatFilterBackendApplication;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.Organization;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.OrganizationMember;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationPermission;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationRole;
 import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
@@ -26,6 +28,18 @@ public class OrganizationController {
     private UserService userService;
     @Autowired
     private UserSecurityManager userSecurityManager;
+
+    /*
+    * TODO:
+    *  - getOrganization
+    *  - updateName
+    *  - inviteMember
+    *  - deleteInvite
+    *  - joinOrganization
+    *  - leaveOrganization
+    *  - createOrganization
+    *  - deleteOrganization
+     */
 
     @GetMapping("/get")
     public ResponseEntity<Organization> getOrganization(UserKey key, UUID organizationUUID) {
@@ -91,6 +105,10 @@ public class OrganizationController {
             return ResponseEntity.status(404).build();
         }
 
+        if (invited.getOrganizations().contains(organizationUUID)) {
+            return ResponseEntity.status(409).build();
+        }
+
         invited.getPendingOrganizationInvites().add(organizationUUID);
         organization.getPendingInvites().add(invited.getUuid());
         userService.update(invited);
@@ -144,6 +162,17 @@ public class OrganizationController {
 
         Organization organization = organizationService.getByUUID(organizationUUID);
         if (organization == null || !organization.getPendingInvites().contains(user.getUuid())) {
+            return ResponseEntity.status(403).build();
         }
+
+        OrganizationMember member = new OrganizationMember(user.getUuid(), ChatFilterBackendApplication.getDefaultRole());
+        organization.getMembers().put(user.getUuid(), member);
+        user.getOrganizations().add(organizationUUID);
+        user.getPendingOrganizationInvites().remove(organizationUUID);
+        organization.getPendingInvites().remove(user);
+
+        userService.update(user);
+        organization = organizationService.update(organization);
+        return ResponseEntity.ok(organization);
     }
 }
