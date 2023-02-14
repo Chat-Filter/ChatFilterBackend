@@ -5,6 +5,7 @@ import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
 import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
 import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
+import net.chatfilter.chatfilterbackend.web.payload.user.UpdateRequest;
 import net.chatfilter.chatfilterbackend.web.security.user.UserSecurityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,8 +33,10 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UserKey key, @RequestBody UserDTO userDTO) {
-        // TODO: Crear objeto para pasar key + userDTO
+    public ResponseEntity<UserDTO> updateUser(@RequestBody UpdateRequest request) {
+        UserKey key = request.getKey();
+        UserDTO userDTO = request.getUserDTO();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
