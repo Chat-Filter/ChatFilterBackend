@@ -12,11 +12,13 @@ import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.organization.OrganizationService;
 import net.chatfilter.chatfilterbackend.persistence.service.organization.role.OrganizationRoleService;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
+import net.chatfilter.chatfilterbackend.web.payload.organization.*;
 import net.chatfilter.chatfilterbackend.web.security.user.UserSecurityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.UUID;
 
@@ -34,7 +36,10 @@ public class OrganizationController {
     private UserMapper userMapper;
 
     @GetMapping("/get")
-    public ResponseEntity<Organization> getOrganization(UserKey key, String organizationId) {
+    public ResponseEntity<Organization> getOrganization(@RequestBody GetRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -54,7 +59,11 @@ public class OrganizationController {
     }
 
     @PostMapping("/update/name")
-    public ResponseEntity<Organization> updateName(UserKey key, String organizationId, String name) {
+    public ResponseEntity<Organization> updateName(@RequestBody UpdateNameRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+        String name = request.getName();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -76,7 +85,11 @@ public class OrganizationController {
     }
 
     @PostMapping("/invite-member")
-    public ResponseEntity<Organization> inviteMember(UserKey key, String organizationId, String invitedEmail) {
+    public ResponseEntity<Organization> inviteMember(@RequestBody InviteRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+        String invitedEmail = request.getInvitedEmail();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -109,7 +122,11 @@ public class OrganizationController {
     }
 
     @PostMapping("/update/delete-invite")
-    public ResponseEntity<Organization> deleteInvite(UserKey key, String organizationId, String invitedId) {
+    public ResponseEntity<Organization> deleteInvite(@RequestBody InviteRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+        String invitedId = request.getInvitedEmail();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -138,7 +155,10 @@ public class OrganizationController {
     }
 
     @PostMapping("/join")
-    public ResponseEntity<Organization> join(UserKey key, String organizationId) {
+    public ResponseEntity<Organization> join(@RequestBody JoinAndLeaveRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -165,7 +185,10 @@ public class OrganizationController {
     }
 
     @PostMapping("/leave")
-    public ResponseEntity<UserDTO> leave(UserKey key, String organizationId) {
+    public ResponseEntity<UserDTO> leave(@RequestBody JoinAndLeaveRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -189,7 +212,10 @@ public class OrganizationController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Organization> create(UserKey key, String name) {
+    public ResponseEntity<Organization> create(@RequestBody CreateRequest request) {
+        UserKey key = request.getKey();
+        String name = request.getName();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -209,7 +235,10 @@ public class OrganizationController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity delete(UserKey key, String organizationId) {
+    public ResponseEntity delete(@RequestBody DeleteRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -235,7 +264,12 @@ public class OrganizationController {
     }
 
     @PostMapping("/update/user-role")
-    public ResponseEntity<Organization> updateRole(UserKey key, UUID userToUpdate, String organizationId, String roleName) {
+    public ResponseEntity<Organization> updateRole(@RequestBody UpdateRoleRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+        String userToUpdate = request.getUserToUpdate();
+        String roleName = request.getRole();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
@@ -267,7 +301,11 @@ public class OrganizationController {
     }
 
     @PostMapping("/kick")
-    public ResponseEntity<Organization> kickFromOrganization(UserKey key, String userToKick, String organizationId) {
+    public ResponseEntity<Organization> kickFromOrganization(@RequestBody KickRequest request) {
+        UserKey key = request.getKey();
+        String organizationId = request.getOrganizationId();
+        String userToKick = request.getUserToKick();
+
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
