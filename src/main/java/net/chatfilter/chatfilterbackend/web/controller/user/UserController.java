@@ -32,7 +32,8 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<UserDTO> updateUser(UserKey key, UserDTO userDTO) {
+    public ResponseEntity<UserDTO> updateUser(@RequestBody UserKey key, @RequestBody UserDTO userDTO) {
+        // TODO: Crear objeto para pasar key + userDTO
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
