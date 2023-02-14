@@ -47,7 +47,7 @@ public class OrganizationController {
         Organization organization = organizationService.getByUUID(organizationUUID);
         OrganizationRole role = organizationRoleService.getByUUID(organization.getMembers().get(key.getBaseUUID()).getRole());
         if (!role.hasPermission(OrganizationPermission.SEE_STATISTICS)) {
-            // TODO: Hide statistics
+            organization.setChecks(null);
         }
 
         return ResponseEntity.ok(organization);
