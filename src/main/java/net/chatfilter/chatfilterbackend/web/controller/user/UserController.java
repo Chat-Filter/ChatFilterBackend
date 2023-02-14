@@ -22,16 +22,13 @@ public class UserController {
     private UserSecurityManager userSecurityManager;
 
     @GetMapping("/get")
-    public ResponseEntity<User> getUser(@RequestBody UserKey key) {
+    public ResponseEntity<UserDTO> getUser(@RequestBody UserKey key) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getById(key.getBaseId());
-        System.out.println("USER: " + user);
-        System.out.println("BaseUUID: " + key.getBaseId());
         UserDTO userDTO = userMapper.toUserDTO(userService.getById(key.getBaseId()));
-        return ResponseEntity.ok(userService.getById(key.getBaseId()));
+        return ResponseEntity.ok(userDTO);
     }
 
     @PostMapping("/update")

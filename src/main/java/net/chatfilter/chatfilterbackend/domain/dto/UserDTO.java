@@ -5,15 +5,15 @@ import java.util.UUID;
 
 public class UserDTO {
 
-    private final UUID uuid;
+    private String id;
     private String email;
     private String name;
     private String lastName;
     private List<UUID> organizations;
     private List<UUID> pendingOrganizationInvites;
 
-    public UserDTO(UUID uuid, String email, String name, String lastName, List<UUID> organizations, List<UUID> pendingOrganizationInvites) {
-        this.uuid = uuid;
+    public UserDTO(String id, String email, String name, String lastName, List<UUID> organizations, List<UUID> pendingOrganizationInvites) {
+        this.id = id;
         this.email = email;
         this.name = name;
         this.lastName = lastName;
@@ -21,8 +21,8 @@ public class UserDTO {
         this.pendingOrganizationInvites = pendingOrganizationInvites;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
     public String getEmail() {

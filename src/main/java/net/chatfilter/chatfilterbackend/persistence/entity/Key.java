@@ -12,6 +12,10 @@ public abstract class Key {
         this.key = baseId + "." + UUID.randomUUID();
     }
 
+    public Key(String key, String baseId) {
+        this.key = key;
+    }
+
     public String getKey() {
         return key;
     }
@@ -20,7 +24,6 @@ public abstract class Key {
         this.key = key;
     }
 
-    @JsonIgnore
     public String getBaseId() {
         return key.split("\\.")[0];
     }

@@ -9,7 +9,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 @Document(collection = "organizations")
 public class Organization {
@@ -17,7 +16,6 @@ public class Organization {
     @Id
     private String id;
 
-    @Id
     private final String owner;
     private String name;
     private HashMap<String, OrganizationMember> members;
