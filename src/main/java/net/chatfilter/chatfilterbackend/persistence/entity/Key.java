@@ -1,13 +1,15 @@
 package net.chatfilter.chatfilterbackend.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.UUID;
 
 public abstract class Key {
 
     private String key;
 
-    public Key(UUID baseUUID) {
-        this.key = baseUUID.toString() + "." + UUID.randomUUID();
+    public Key(String baseId) {
+        this.key = baseId + "." + UUID.randomUUID();
     }
 
     public String getKey() {
@@ -18,8 +20,9 @@ public abstract class Key {
         this.key = key;
     }
 
-    public UUID getBaseUUID() {
-        return UUID.fromString(key.split("\\.")[0]);
+    @JsonIgnore
+    public String getBaseId() {
+        return key.split("\\.")[0];
     }
 
     @Override

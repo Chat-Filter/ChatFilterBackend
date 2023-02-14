@@ -34,18 +34,18 @@ public class OrganizationController {
     private UserMapper userMapper;
 
     @GetMapping("/get")
-    public ResponseEntity<Organization> getOrganization(UserKey key, UUID organizationUUID) {
+    public ResponseEntity<Organization> getOrganization(UserKey key, String organizationId) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
-        OrganizationRole role = organizationRoleService.getByUUID(organization.getMembers().get(key.getBaseUUID()).getRole());
+        Organization organization = organizationService.getById(organizationId);
+        OrganizationRole role = organizationRoleService.getById(organization.getMembers().get(key.getBaseId()).getRole());
         if (!role.hasPermission(OrganizationPermission.SEE_STATISTICS)) {
             organization.setChecks(null);
         }
@@ -54,18 +54,18 @@ public class OrganizationController {
     }
 
     @PostMapping("/update/name")
-    public ResponseEntity<Organization> updateName(UserKey key, UUID organizationUUID, String name) {
+    public ResponseEntity<Organization> updateName(UserKey key, String organizationId, String name) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
-        OrganizationRole role = organizationRoleService.getByUUID(organization.getMembers().get(key.getBaseUUID()).getRole());
+        Organization organization = organizationService.getById(organizationId);
+        OrganizationRole role = organizationRoleService.getById(organization.getMembers().get(key.getBaseId()).getRole());
         if (!role.hasPermission(OrganizationPermission.UPDATE_NAME)) {
             return ResponseEntity.status(403).build();
         }
@@ -76,18 +76,18 @@ public class OrganizationController {
     }
 
     @PostMapping("/invite-member")
-    public ResponseEntity<Organization> inviteMember(UserKey key, UUID organizationUUID, String invitedEmail) {
+    public ResponseEntity<Organization> inviteMember(UserKey key, String organizationId, String invitedEmail) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
-        OrganizationRole role = organizationRoleService.getByUUID(organization.getMembers().get(key.getBaseUUID()).getRole());
+        Organization organization = organizationService.getById(organizationId);
+        OrganizationRole role = organizationRoleService.getById(organization.getMembers().get(key.getBaseId()).getRole());
         if (!role.hasPermission(OrganizationPermission.INVITE_MEMBER)) {
             return ResponseEntity.status(403).build();
         }
@@ -97,66 +97,66 @@ public class OrganizationController {
             return ResponseEntity.status(404).build();
         }
 
-        if (invited.getOrganizations().contains(organizationUUID)) {
+        if (invited.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(409).build();
         }
 
-        invited.getPendingOrganizationInvites().add(organizationUUID);
-        organization.getPendingInvites().add(invited.getUuid());
+        invited.getPendingOrganizationInvites().add(organizationId);
+        organization.getPendingInvites().add(invited.getId());
         userService.update(invited);
         organization = organizationService.update(organization);
         return ResponseEntity.ok(organization);
     }
 
     @PostMapping("/update/delete-invite")
-    public ResponseEntity<Organization> deleteInvite(UserKey key, UUID organizationUUID, UUID invitedUUID) {
+    public ResponseEntity<Organization> deleteInvite(UserKey key, String organizationId, String invitedId) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
-        OrganizationRole role = organizationRoleService.getByUUID(organization.getMembers().get(key.getBaseUUID()).getRole());
+        Organization organization = organizationService.getById(organizationId);
+        OrganizationRole role = organizationRoleService.getById(organization.getMembers().get(key.getBaseId()).getRole());
         if (!role.hasPermission(OrganizationPermission.DELETE_INVITE)) {
             return ResponseEntity.status(403).build();
         }
 
-        User invited = userService.getByUUID(invitedUUID);
+        User invited = userService.getById(invitedId);
         if (invited == null) {
             return ResponseEntity.status(404).build();
         }
 
-        invited.getPendingOrganizationInvites().remove(organizationUUID);
-        organization.getPendingInvites().remove(invitedUUID);
+        invited.getPendingOrganizationInvites().remove(organizationId);
+        organization.getPendingInvites().remove(invitedId);
         userService.update(invited);
         organization = organizationService.update(organization);
         return ResponseEntity.ok(organization);
     }
 
     @PostMapping("/join")
-    public ResponseEntity<Organization> join(UserKey key, UUID organizationUUID) {
+    public ResponseEntity<Organization> join(UserKey key, String organizationId) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getPendingOrganizationInvites().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getPendingOrganizationInvites().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
-        if (organization == null || !organization.getPendingInvites().contains(user.getUuid())) {
+        Organization organization = organizationService.getById(organizationId);
+        if (organization == null || !organization.getPendingInvites().contains(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
-        OrganizationMember member = new OrganizationMember(user.getUuid(), ChatFilterBackendApplication.getDefaultRole());
-        organization.getMembers().put(user.getUuid(), member);
-        user.getOrganizations().add(organizationUUID);
-        user.getPendingOrganizationInvites().remove(organizationUUID);
+        OrganizationMember member = new OrganizationMember(user.getId(), ChatFilterBackendApplication.getDefaultRole());
+        organization.getMembers().put(user.getId(), member);
+        user.getOrganizations().add(organizationId);
+        user.getPendingOrganizationInvites().remove(organizationId);
         organization.getPendingInvites().remove(user);
 
         userService.update(user);
@@ -165,23 +165,23 @@ public class OrganizationController {
     }
 
     @PostMapping("/leave")
-    public ResponseEntity<UserDTO> leave(UserKey key, UUID organizationUUID) {
+    public ResponseEntity<UserDTO> leave(UserKey key, String organizationId) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
+        Organization organization = organizationService.getById(organizationId);
         if (organization == null) {
             return ResponseEntity.status(403).build();
         }
 
-        organization.getMembers().remove(user.getUuid());
-        user.getOrganizations().remove(organizationUUID);
+        organization.getMembers().remove(user.getId());
+        user.getOrganizations().remove(organizationId);
 
         organization = organizationService.update(organization);
         userService.update(user);
@@ -194,18 +194,13 @@ public class OrganizationController {
             return ResponseEntity.status(401).build();
         }
 
-        UUID organizationUUID = UUID.randomUUID();
-        while (organizationService.getByUUID(organizationUUID) != null) {
-            organizationUUID = UUID.randomUUID();
-        }
-
-        User user = userService.getByUUID(key.getBaseUUID());
+        User user = userService.getById(key.getBaseId());
         if (user == null) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = new Organization(organizationUUID, user.getUuid(), name);
-        user.getOrganizations().add(organization.getUuid());
+        Organization organization = new Organization(user.getId(), name);
+        user.getOrganizations().add(organization.getId());
 
         organization = organizationService.create(organization);
         user = userService.update(user);
@@ -214,48 +209,48 @@ public class OrganizationController {
     }
 
     @PostMapping("/delete")
-    public ResponseEntity delete(UserKey key, UUID organizationUUID) {
+    public ResponseEntity delete(UserKey key, String organizationId) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
-        if (!organization.getOwner().equals(user.getUuid())) {
+        Organization organization = organizationService.getById(organizationId);
+        if (!organization.getOwner().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
         for (OrganizationMember member : organization.getMembers().values()) {
-            User memberUser = userService.getByUUID(member.getUuid());
-            memberUser.getOrganizations().remove(organizationUUID);
+            User memberUser = userService.getById(member.getId());
+            memberUser.getOrganizations().remove(organizationId);
             userService.update(memberUser);
         }
 
-        organizationService.delete(organizationUUID);
+        organizationService.delete(organizationId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/update/user-role")
-    public ResponseEntity<Organization> updateRole(UserKey key, UUID userToUpdateUUID, UUID organizationUUID, String roleName) {
+    public ResponseEntity<Organization> updateRole(UserKey key, UUID userToUpdate, String organizationId, String roleName) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
-        if (!organization.getOwner().equals(user.getUuid())) {
+        Organization organization = organizationService.getById(organizationId);
+        if (!organization.getOwner().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
-        OrganizationMember updatedMember = organization.getMembers().get(userToUpdateUUID);
+        OrganizationMember updatedMember = organization.getMembers().get(userToUpdate);
         if (updatedMember == null) {
             return ResponseEntity.status(404).build();
         }
@@ -265,38 +260,38 @@ public class OrganizationController {
             return ResponseEntity.status(404).build();
         }
 
-        updatedMember.setRole(role.getUuid());
+        updatedMember.setRole(role.getId());
         organization = organizationService.update(organization);
 
         return ResponseEntity.ok(organization);
     }
 
     @PostMapping("/kick")
-    public ResponseEntity<Organization> kickFromOrganization(UserKey key, UUID userToKick, UUID organizationUUID) {
+    public ResponseEntity<Organization> kickFromOrganization(UserKey key, String userToKick, String organizationId) {
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userService.getByUUID(key.getBaseUUID());
-        if (!user.getOrganizations().contains(organizationUUID)) {
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
-        Organization organization = organizationService.getByUUID(organizationUUID);
-        if (!organization.getOwner().equals(user.getUuid())) {
+        Organization organization = organizationService.getById(organizationId);
+        if (!organization.getOwner().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
-        User kickedUser = userService.getByUUID(userToKick);
+        User kickedUser = userService.getById(userToKick);
         if (kickedUser == null) {
             return ResponseEntity.status(404).build();
         }
 
-        if (!kickedUser.getOrganizations().contains(organizationUUID)) {
+        if (!kickedUser.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(404).build();
         }
 
-        kickedUser.getOrganizations().remove(organizationUUID);
+        kickedUser.getOrganizations().remove(organizationId);
         organization.getMembers().remove(userToKick);
 
         userService.update(kickedUser);

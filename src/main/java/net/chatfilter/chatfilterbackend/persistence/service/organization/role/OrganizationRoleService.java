@@ -4,15 +4,13 @@ import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.Org
 import net.chatfilter.chatfilterbackend.persistence.repository.OrganizationRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.UUID;
-
 public class OrganizationRoleService {
 
     @Autowired
     private OrganizationRoleRepository repository;
 
-    public OrganizationRole getByUUID(UUID uuid) {
-        return repository.findById(uuid).orElse(null);
+    public OrganizationRole getById(String id) {
+        return repository.findById(id).orElse(null);
     }
 
     public OrganizationRole getByName(String name) {

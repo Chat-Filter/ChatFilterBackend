@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class ApiKey extends Key {
 
-    public ApiKey(UUID organizationUUID) {
-        super(organizationUUID);
+    public ApiKey(String organizationId) {
+        super(organizationId);
     }
 }

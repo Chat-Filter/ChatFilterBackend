@@ -1,21 +1,25 @@
 package net.chatfilter.chatfilterbackend.persistence.entity.user;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Document(collection = "users")
 public class User {
 
-    private final UUID uuid;
+    @Id
+    private String id;
     private String email;
     private String encodedPassword;
     private String name;
     private String lastName;
-    private List<UUID> organizations;
-    private List<UUID> pendingOrganizationInvites;
+    private List<String> organizations;
+    private List<String> pendingOrganizationInvites;
 
-    public User(UUID uuid, String email, String encodedPassword, String name, String lastName) {
-        this.uuid = uuid;
+    public User(String email, String encodedPassword, String name, String lastName) {
         this.email = email;
         this.encodedPassword = encodedPassword;
         this.name = name;
@@ -24,8 +28,8 @@ public class User {
         pendingOrganizationInvites = new ArrayList<>();
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
     public String getEmail() {
@@ -60,19 +64,19 @@ public class User {
         this.lastName = lastName;
     }
 
-    public List<UUID> getOrganizations() {
+    public List<String> getOrganizations() {
         return organizations;
     }
 
-    public void setOrganizations(List<UUID> organizations) {
+    public void setOrganizations(List<String> organizations) {
         this.organizations = organizations;
     }
 
-    public List<UUID> getPendingOrganizationInvites() {
+    public List<String> getPendingOrganizationInvites() {
         return pendingOrganizationInvites;
     }
 
-    public void setPendingOrganizationInvites(List<UUID> pendingOrganizationInvites) {
+    public void setPendingOrganizationInvites(List<String> pendingOrganizationInvites) {
         this.pendingOrganizationInvites = pendingOrganizationInvites;
     }
 }

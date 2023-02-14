@@ -5,8 +5,6 @@ import net.chatfilter.chatfilterbackend.persistence.repository.OrganizationRepos
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 public class OrganizationService {
 
@@ -17,15 +15,15 @@ public class OrganizationService {
         return repository.insert(organization);
     }
 
-    public Organization getByUUID(UUID uuid) {
-        return repository.findById(uuid).orElse(null);
+    public Organization getById(String id) {
+        return repository.findById(id).orElse(null);
     }
 
     public Organization update(Organization organization) {
         return repository.save(organization);
     }
 
-    public void delete(UUID uuid) {
-        repository.deleteById(uuid);
+    public void delete(String id) {
+        repository.deleteById(id);
     }
 }

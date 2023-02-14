@@ -1,20 +1,24 @@
 package net.chatfilter.chatfilterbackend.persistence.entity.organization.role;
 
-import java.util.List;
-import java.util.UUID;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
+@Document(collection = "organization_roles")
 public class OrganizationRole {
-    private final UUID uuid;
+
+    @Id
+    private String id;
     private String name;
     private List<OrganizationPermission> permissions;
 
-    public OrganizationRole(UUID uuid, String name) {
-        this.uuid = uuid;
+    public OrganizationRole(String name) {
         this.name = name;
     }
 
-    public UUID getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
     public String getName() {

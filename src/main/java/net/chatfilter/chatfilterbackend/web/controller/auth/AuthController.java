@@ -6,6 +6,7 @@ import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserAuthResult;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
 import net.chatfilter.chatfilterbackend.web.security.user.UserAuthUtil;
+import net.chatfilter.chatfilterbackend.web.security.user.UserSecurityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +25,8 @@ public class AuthController {
     private UserMapper userMapper;
     @Autowired
     private UserAuthUtil userAuthUtil;
+    @Autowired
+    private UserSecurityManager userSecurityManager;
 
     @PostMapping("/login")
     public ResponseEntity<UserKey> login(String email, String password) {
@@ -32,7 +35,8 @@ public class AuthController {
         switch (result) {
             case SUCCESS -> {
                 User user = userService.getByEmail(email);
-                UserKey userKey = new UserKey(user.getUuid());
+                UserKey userKey = new UserKey(user.getId());
+                userSecurityManager.insertUser(userKey);
                 return ResponseEntity.ok(userKey);
             }
             case UNKNOWN_USER, WRONG_PASSWORD -> {
@@ -49,14 +53,12 @@ public class AuthController {
             return ResponseEntity.status(409).build();
         }
 
-        UUID userUUID = UUID.randomUUID();
-        while (userService.getByUUID(userUUID) != null) {
-            userUUID = UUID.randomUUID();
-        }
-
         password = userAuthUtil.encodePassword(password);
-        User user = new User(userUUID, email, password, name, lastName);
-        UserKey userKey = new UserKey(user.getUuid());
+        User user = new User(email, password, name, lastName);
+        userService.create(user);
+
+        UserKey userKey = new UserKey(user.getId());
+        userSecurityManager.insertUser(userKey);
         return ResponseEntity.ok(userKey);
     }
 }

@@ -8,13 +8,13 @@ import java.util.UUID;
 @SpringBootApplication
 public class ChatFilterBackendApplication {
 
-	private static UUID DEFAULT_ROLE;
+	private static String DEFAULT_ROLE;
 
 	public static void main(String[] args) {
 		SpringApplication.run(ChatFilterBackendApplication.class, args);
 	}
 
-	public static UUID getDefaultRole() {
+	public static String getDefaultRole() {
 		return DEFAULT_ROLE;
 	}
 }

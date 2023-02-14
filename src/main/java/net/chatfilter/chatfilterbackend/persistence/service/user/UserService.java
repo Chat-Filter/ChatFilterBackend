@@ -6,8 +6,6 @@ import net.chatfilter.chatfilterbackend.web.security.user.UserAuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 public class UserService {
 
@@ -20,8 +18,8 @@ public class UserService {
         return repository.insert(user);
     }
 
-    public User getByUUID(UUID uuid) {
-        return repository.findById(uuid).orElse(null);
+    public User getById(String id) {
+        return repository.findById(id).orElse(null);
     }
 
     public User getByEmail(String email) {
