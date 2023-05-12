@@ -1,13 +1,15 @@
 package net.chatfilter.chatfilterbackend.web.controller.organization;
 
-import net.chatfilter.chatfilterbackend.ChatFilterBackendApplication;
 import net.chatfilter.chatfilterbackend.domain.dto.UserDTO;
+import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.Organization;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.invite.InvitedUser;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.MemberData;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.OrganizationMember;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationPermission;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationRole;
 import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
-import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
+import net.chatfilter.chatfilterbackend.persistence.entity.user.invite.PendingInvite;
 import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.organization.OrganizationService;
 import net.chatfilter.chatfilterbackend.persistence.service.organization.role.OrganizationRoleService;
@@ -16,12 +18,10 @@ import net.chatfilter.chatfilterbackend.web.payload.organization.*;
 import net.chatfilter.chatfilterbackend.web.security.user.UserSecurityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
+@RestController
+@RequestMapping("/organization")
 public class OrganizationController {
 
     @Autowired
@@ -35,10 +35,10 @@ public class OrganizationController {
     @Autowired
     private UserMapper userMapper;
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/get")
-    public ResponseEntity<Organization> getOrganization(@RequestBody GetRequest request) {
-        UserKey key = request.getKey();
-        String organizationId = request.getOrganizationId();
+    public ResponseEntity<Organization> getOrganization(String userKey, String organizationId) {
+        Key key = new Key(userKey);
 
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
@@ -50,6 +50,8 @@ public class OrganizationController {
         }
 
         Organization organization = organizationService.getById(organizationId);
+        if (organization == null) return ResponseEntity.status(404).build();
+
         OrganizationRole role = organizationRoleService.getById(organization.getMembers().get(key.getBaseId()).getRole());
         if (!role.hasPermission(OrganizationPermission.SEE_STATISTICS)) {
             organization.setChecks(null);
@@ -58,9 +60,10 @@ public class OrganizationController {
         return ResponseEntity.ok(organization);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/update/name")
     public ResponseEntity<Organization> updateName(@RequestBody UpdateNameRequest request) {
-        UserKey key = request.getKey();
+        Key key = request.getKey();
         String organizationId = request.getOrganizationId();
         String name = request.getName();
 
@@ -84,9 +87,10 @@ public class OrganizationController {
         return ResponseEntity.ok(organization);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/invite-member")
     public ResponseEntity<Organization> inviteMember(@RequestBody InviteRequest request) {
-        UserKey key = request.getKey();
+        Key key = new Key(request.getKey());
         String organizationId = request.getOrganizationId();
         String invitedEmail = request.getInvitedEmail();
 
@@ -109,21 +113,23 @@ public class OrganizationController {
         if (invited == null) {
             return ResponseEntity.status(404).build();
         }
-
         if (invited.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(409).build();
         }
 
-        invited.getPendingOrganizationInvites().add(organizationId);
-        organization.getPendingInvites().add(invited.getId());
+        PendingInvite pendingInvite = new PendingInvite(organizationId, organization.getName());
+        invited.getPendingOrganizationInvites().put(organizationId, pendingInvite);
+        InvitedUser invitedUser = new InvitedUser(organizationId, invitedEmail);
+        organization.getPendingInvites().put(invitedEmail, invitedUser);
         userService.update(invited);
         organization = organizationService.update(organization);
         return ResponseEntity.ok(organization);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/update/delete-invite")
     public ResponseEntity<Organization> deleteInvite(@RequestBody InviteRequest request) {
-        UserKey key = request.getKey();
+        Key key = new Key(request.getKey());
         String organizationId = request.getOrganizationId();
         String invitedId = request.getInvitedEmail();
 
@@ -142,7 +148,7 @@ public class OrganizationController {
             return ResponseEntity.status(403).build();
         }
 
-        User invited = userService.getById(invitedId);
+        User invited = userService.getByEmail(invitedId);
         if (invited == null) {
             return ResponseEntity.status(404).build();
         }
@@ -154,9 +160,10 @@ public class OrganizationController {
         return ResponseEntity.ok(organization);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/join")
     public ResponseEntity<Organization> join(@RequestBody JoinAndLeaveRequest request) {
-        UserKey key = request.getKey();
+        Key key = request.getKey();
         String organizationId = request.getOrganizationId();
 
         if (!userSecurityManager.isValid(key)) {
@@ -164,29 +171,30 @@ public class OrganizationController {
         }
 
         User user = userService.getById(key.getBaseId());
-        if (!user.getPendingOrganizationInvites().contains(organizationId)) {
+        if (!user.getPendingOrganizationInvites().containsKey(organizationId)) {
             return ResponseEntity.status(403).build();
         }
 
         Organization organization = organizationService.getById(organizationId);
-        if (organization == null || !organization.getPendingInvites().contains(user.getId())) {
+        if (organization == null || !organization.getPendingInvites().containsKey(user.getEmail())) {
             return ResponseEntity.status(403).build();
         }
 
-        OrganizationMember member = new OrganizationMember(user.getId(), ChatFilterBackendApplication.getDefaultRole());
+        OrganizationMember member = new OrganizationMember(user.getId(), organizationRoleService.getByName("user").getId());
         organization.getMembers().put(user.getId(), member);
         user.getOrganizations().add(organizationId);
         user.getPendingOrganizationInvites().remove(organizationId);
-        organization.getPendingInvites().remove(user);
+        organization.getPendingInvites().remove(user.getEmail());
 
         userService.update(user);
         organization = organizationService.update(organization);
         return ResponseEntity.ok(organization);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/leave")
     public ResponseEntity<UserDTO> leave(@RequestBody JoinAndLeaveRequest request) {
-        UserKey key = request.getKey();
+        Key key = request.getKey();
         String organizationId = request.getOrganizationId();
 
         if (!userSecurityManager.isValid(key)) {
@@ -211,9 +219,10 @@ public class OrganizationController {
         return ResponseEntity.ok(userMapper.toUserDTO(user));
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/create")
     public ResponseEntity<Organization> create(@RequestBody CreateRequest request) {
-        UserKey key = request.getKey();
+        Key key = new Key(request.getKey());
         String name = request.getName();
 
         if (!userSecurityManager.isValid(key)) {
@@ -226,17 +235,24 @@ public class OrganizationController {
         }
 
         Organization organization = new Organization(user.getId(), name);
-        user.getOrganizations().add(organization.getId());
+
+        OrganizationRole ownerRole = organizationRoleService.getByName("owner");
+        organization.getMembers().put(user.getId(), new OrganizationMember(user.getId(), ownerRole.getId()));
 
         organization = organizationService.create(organization);
+        organization.setKey(new Key(organization.getId()));
+        organization = organizationService.update(organization);
+
+        user.getOrganizations().add(organization.getId());
         user = userService.update(user);
 
         return ResponseEntity.ok(organization);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/delete")
     public ResponseEntity delete(@RequestBody DeleteRequest request) {
-        UserKey key = request.getKey();
+        Key key = request.getKey();
         String organizationId = request.getOrganizationId();
 
         if (!userSecurityManager.isValid(key)) {
@@ -263,9 +279,10 @@ public class OrganizationController {
         return ResponseEntity.ok().build();
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/update/user-role")
     public ResponseEntity<Organization> updateRole(@RequestBody UpdateRoleRequest request) {
-        UserKey key = request.getKey();
+        Key key = request.getKey();
         String organizationId = request.getOrganizationId();
         String userToUpdate = request.getUserToUpdate();
         String roleName = request.getRole();
@@ -300,11 +317,12 @@ public class OrganizationController {
         return ResponseEntity.ok(organization);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/kick")
     public ResponseEntity<Organization> kickFromOrganization(@RequestBody KickRequest request) {
-        UserKey key = request.getKey();
+        Key key = new Key(request.getKey());
         String organizationId = request.getOrganizationId();
-        String userToKick = request.getUserToKick();
+        String userToKick = request.getUserIdToKick();
 
         if (!userSecurityManager.isValid(key)) {
             return ResponseEntity.status(401).build();
@@ -320,21 +338,58 @@ public class OrganizationController {
             return ResponseEntity.status(403).build();
         }
 
-        User kickedUser = userService.getById(userToKick);
-        if (kickedUser == null) {
+        OrganizationRole role = organizationRoleService.getById(organization.getMembers().get(key.getBaseId()).getRole());
+        if (!role.hasPermission(OrganizationPermission.KICK_MEMBERS)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        if (organization.getOwner().equals(userToKick)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        if (key.getBaseId().equals(userToKick)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        User target = userService.getById(userToKick);
+        if (target == null) {
             return ResponseEntity.status(404).build();
         }
 
-        if (!kickedUser.getOrganizations().contains(organizationId)) {
+        if (!target.getOrganizations().contains(organizationId)) {
             return ResponseEntity.status(404).build();
         }
 
-        kickedUser.getOrganizations().remove(organizationId);
+        target.getOrganizations().remove(organizationId);
         organization.getMembers().remove(userToKick);
 
-        userService.update(kickedUser);
+        userService.update(target);
         organization = organizationService.update(organization);
         return ResponseEntity.ok(organization);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/member-data")
+    public ResponseEntity<MemberData> getMemberData(String userKey, String organizationId, String memberId) {
+        Key key = new Key(userKey);
+
+        if (!userSecurityManager.isValid(key)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        User target = userService.getById(memberId);
+        if (!target.getOrganizations().contains(organizationId)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Organization organization = organizationService.getById(organizationId);
+
+        String role = organizationRoleService.getById(organization.getMembers().get(memberId).getRole()).getName();
+        return ResponseEntity.ok(new MemberData(target.getId(), target.getEmail(), target.getName(), target.getLastName(), role));
+    }
 }

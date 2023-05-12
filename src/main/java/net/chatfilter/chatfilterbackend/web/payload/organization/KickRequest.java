@@ -1,33 +1,31 @@
 package net.chatfilter.chatfilterbackend.web.payload.organization;
 
-import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
-
 public class KickRequest {
 
-    private UserKey key;
-    private String userToKick;
+    private String key;
+    private String userIdToKick;
     private String organizationId;
 
-    public KickRequest(UserKey key, String userToKick, String organizationId) {
+    public KickRequest(String key, String userToKick, String organizationId) {
         this.key = key;
-        this.userToKick = userToKick;
+        this.userIdToKick = userToKick;
         this.organizationId = organizationId;
     }
 
-    public UserKey getKey() {
+    public String getKey() {
         return key;
     }
 
-    public void setKey(UserKey key) {
+    public void setKey(String key) {
         this.key = key;
     }
 
-    public String getUserToKick() {
-        return userToKick;
+    public String getUserIdToKick() {
+        return userIdToKick;
     }
 
-    public void setUserToKick(String userToKick) {
-        this.userToKick = userToKick;
+    public void setUserIdToKick(String userIdToKick) {
+        this.userIdToKick = userIdToKick;
     }
 
     public String getOrganizationId() {

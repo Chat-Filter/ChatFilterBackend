@@ -1,6 +1,7 @@
 package net.chatfilter.chatfilterbackend.persistence.entity.organization;
 
-import net.chatfilter.chatfilterbackend.persistence.entity.organization.key.ApiKey;
+import net.chatfilter.chatfilterbackend.persistence.entity.Key;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.invite.InvitedUser;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.OrganizationMember;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,23 +15,22 @@ import java.util.List;
 public class Organization {
 
     @Id
-    private String id;
+    protected String id;
 
     private final String owner;
     private String name;
     private HashMap<String, OrganizationMember> members;
-    private List<String> pendingInvites;
+    private HashMap<String, InvitedUser> pendingInvites;
     private HashMap<LocalTime, Integer> checks;
-    private ApiKey key;
+    private Key key;
     private String planName;
 
     public Organization(String owner, String name) {
         this.owner = owner;
         this.name = name;
         this.members = new HashMap<>();
-        this.pendingInvites = new ArrayList<>();
+        this.pendingInvites = new HashMap<>();
         this.checks = new HashMap<>();
-        this.key = new ApiKey(id);
     }
 
     public String getId() {
@@ -57,11 +57,11 @@ public class Organization {
         this.members = members;
     }
 
-    public List<String> getPendingInvites() {
+    public HashMap<String, InvitedUser> getPendingInvites() {
         return pendingInvites;
     }
 
-    public void setPendingInvites(List<String> pendingInvites) {
+    public void setPendingInvites(HashMap<String, InvitedUser> pendingInvites) {
         this.pendingInvites = pendingInvites;
     }
 
@@ -73,11 +73,11 @@ public class Organization {
         this.checks = checks;
     }
 
-    public ApiKey getKey() {
+    public Key getKey() {
         return key;
     }
 
-    public void setKey(ApiKey key) {
+    public void setKey(Key key) {
         this.key = key;
     }
 

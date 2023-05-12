@@ -1,23 +1,22 @@
 package net.chatfilter.chatfilterbackend.web.payload.organization;
 
-import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
+import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 
 public class InviteRequest {
 
-    private UserKey key;
-    private String organizationId, invitedEmail;
+    private String key, organizationId, invitedEmail;
 
-    public InviteRequest(UserKey key, String organizationId, String invitedEmail) {
+    public InviteRequest(String key, String organizationId, String invitedEmail) {
         this.key = key;
         this.organizationId = organizationId;
         this.invitedEmail = invitedEmail;
     }
 
-    public UserKey getKey() {
+    public String getKey() {
         return key;
     }
 
-    public void setKey(UserKey key) {
+    public void setKey(String key) {
         this.key = key;
     }
 

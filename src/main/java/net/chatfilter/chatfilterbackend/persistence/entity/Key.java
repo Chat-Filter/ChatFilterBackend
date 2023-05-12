@@ -1,19 +1,20 @@
 package net.chatfilter.chatfilterbackend.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mongodb.lang.Nullable;
 
 import java.util.UUID;
 
-public abstract class Key {
+public class Key {
 
     private String key;
 
-    public Key(String baseId) {
-        this.key = baseId + "." + UUID.randomUUID();
-    }
-
-    public Key(String key, String baseId) {
-        this.key = key;
+    public Key(String key) {
+        if (key.contains(".")) {
+            this.key = key;
+        } else {
+            this.key = key + "." + UUID.randomUUID();
+        }
     }
 
     public String getKey() {

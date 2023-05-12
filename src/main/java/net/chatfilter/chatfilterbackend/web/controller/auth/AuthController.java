@@ -1,19 +1,17 @@
 package net.chatfilter.chatfilterbackend.web.controller.auth;
 
+import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
-import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
 import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserAuthResult;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
+import net.chatfilter.chatfilterbackend.web.payload.auth.LoginRequest;
+import net.chatfilter.chatfilterbackend.web.payload.auth.RegisterRequest;
 import net.chatfilter.chatfilterbackend.web.security.user.UserAuthUtil;
 import net.chatfilter.chatfilterbackend.web.security.user.UserSecurityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,36 +26,40 @@ public class AuthController {
     @Autowired
     private UserSecurityManager userSecurityManager;
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/login")
-    public ResponseEntity<UserKey> login(String email, String password) {
+    public ResponseEntity<Key> login(@RequestBody LoginRequest request) {
+        String email = request.getEmail();
+        String password = request.getPassword();
         UserAuthResult result = userService.auth(email, password);
 
         switch (result) {
             case SUCCESS -> {
                 User user = userService.getByEmail(email);
-                UserKey userKey = new UserKey(user.getId());
+                Key userKey = new Key(user.getId());
                 userSecurityManager.insertUser(userKey);
                 return ResponseEntity.ok(userKey);
             }
             case UNKNOWN_USER, WRONG_PASSWORD -> {
-                return ResponseEntity.status(401).build();
+                return ResponseEntity.ok(null);
             }
         }
 
         return ResponseEntity.status(500).build();
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<UserKey> register(String email, String password, String name, String lastName) {
-        if (userService.getByEmail(email) != null) {
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping(path = "/register")
+    public ResponseEntity<Key> register(@RequestBody RegisterRequest request) {
+        if (userService.getByEmail(request.getEmail()) != null) {
             return ResponseEntity.status(409).build();
         }
 
-        password = userAuthUtil.encodePassword(password);
-        User user = new User(email, password, name, lastName);
+        request.setPassword(userAuthUtil.encodePassword(request.getPassword()));
+        User user = new User(request.getEmail(), request.getPassword(), request.getName(), request.getLastName());
         userService.create(user);
 
-        UserKey userKey = new UserKey(user.getId());
+        Key userKey = new Key(user.getId());
         userSecurityManager.insertUser(userKey);
         return ResponseEntity.ok(userKey);
     }

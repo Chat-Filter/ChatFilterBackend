@@ -1,28 +1,27 @@
 package net.chatfilter.chatfilterbackend.web.payload.user;
 
 import net.chatfilter.chatfilterbackend.domain.dto.UserDTO;
-import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
 
 public class UpdateRequest {
 
-    private UserKey key;
+    private String key;
     private UserDTO userDTO;
 
-    public UpdateRequest(UserKey key, UserDTO userDTO) {
+    public UpdateRequest(String key, UserDTO userDTO) {
         this.key = key;
         this.userDTO = userDTO;
     }
 
-    public UserKey getKey() {
+    public String getKey() {
         return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public UserDTO getUserDTO() {
         return userDTO;
-    }
-
-    public void setKey(UserKey key) {
-        this.key = key;
     }
 
     public void setUserDTO(UserDTO userDTO) {

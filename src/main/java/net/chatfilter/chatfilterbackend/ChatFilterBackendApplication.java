@@ -1,5 +1,10 @@
 package net.chatfilter.chatfilterbackend;
 
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationPermission;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationRole;
+import net.chatfilter.chatfilterbackend.persistence.service.organization.role.OrganizationRoleService;
+import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

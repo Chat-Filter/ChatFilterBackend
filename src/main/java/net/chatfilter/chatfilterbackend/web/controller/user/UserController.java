@@ -1,8 +1,8 @@
 package net.chatfilter.chatfilterbackend.web.controller.user;
 
 import net.chatfilter.chatfilterbackend.domain.dto.UserDTO;
+import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
-import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
 import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
 import net.chatfilter.chatfilterbackend.web.payload.user.UpdateRequest;
@@ -22,19 +22,23 @@ public class UserController {
     @Autowired
     private UserSecurityManager userSecurityManager;
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @GetMapping("/get")
-    public ResponseEntity<UserDTO> getUser(@RequestBody UserKey key) {
-        if (!userSecurityManager.isValid(key)) {
+    public ResponseEntity<UserDTO> getUser(String key) {
+        Key userKey = new Key(key);
+        if (!userSecurityManager.isValid(userKey)) {
             return ResponseEntity.status(401).build();
         }
 
-        UserDTO userDTO = userMapper.toUserDTO(userService.getById(key.getBaseId()));
+        User user = userService.getById(userKey.getBaseId());
+        UserDTO userDTO = userMapper.toUserDTO(userService.getById(userKey.getBaseId()));
         return ResponseEntity.ok(userDTO);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/update")
     public ResponseEntity<UserDTO> updateUser(@RequestBody UpdateRequest request) {
-        UserKey key = request.getKey();
+        Key key = new Key(request.getKey());
         UserDTO userDTO = request.getUserDTO();
 
         if (!userSecurityManager.isValid(key)) {

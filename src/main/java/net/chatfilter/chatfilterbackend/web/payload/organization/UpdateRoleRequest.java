@@ -1,26 +1,26 @@
 package net.chatfilter.chatfilterbackend.web.payload.organization;
 
-import net.chatfilter.chatfilterbackend.persistence.entity.user.key.UserKey;
+import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 
 public class UpdateRoleRequest {
 
-    private UserKey key;
+    private Key key;
     private String userToUpdate;
     private String organizationId;
     private String role;
 
-    public UpdateRoleRequest(UserKey key, String userToUpdate, String organizationId, String role) {
+    public UpdateRoleRequest(Key key, String userToUpdate, String organizationId, String role) {
         this.key = key;
         this.userToUpdate = userToUpdate;
         this.organizationId = organizationId;
         this.role = role;
     }
 
-    public UserKey getKey() {
+    public Key getKey() {
         return key;
     }
 
-    public void setKey(UserKey key) {
+    public void setKey(Key key) {
         this.key = key;
     }
 

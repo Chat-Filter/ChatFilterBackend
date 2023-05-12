@@ -1,5 +1,8 @@
 package net.chatfilter.chatfilterbackend.domain.dto;
 
+import net.chatfilter.chatfilterbackend.persistence.entity.user.invite.PendingInvite;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,10 +12,10 @@ public class UserDTO {
     private String email;
     private String name;
     private String lastName;
-    private List<UUID> organizations;
-    private List<UUID> pendingOrganizationInvites;
+    private List<String> organizations;
+    private HashMap<String, PendingInvite> pendingOrganizationInvites;
 
-    public UserDTO(String id, String email, String name, String lastName, List<UUID> organizations, List<UUID> pendingOrganizationInvites) {
+    public UserDTO(String id, String email, String name, String lastName, List<String> organizations, HashMap<String, PendingInvite> pendingOrganizationInvites) {
         this.id = id;
         this.email = email;
         this.name = name;
@@ -49,19 +52,23 @@ public class UserDTO {
         this.lastName = lastName;
     }
 
-    public List<UUID> getOrganizations() {
+    public List<String> getOrganizations() {
         return organizations;
     }
 
-    public void setOrganizations(List<UUID> organizations) {
+    public void setOrganizations(List<String> organizations) {
         this.organizations = organizations;
     }
 
-    public List<UUID> getPendingOrganizationInvites() {
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public HashMap<String, PendingInvite> getPendingOrganizationInvites() {
         return pendingOrganizationInvites;
     }
 
-    public void setPendingOrganizationInvites(List<UUID> pendingOrganizationInvites) {
+    public void setPendingOrganizationInvites(HashMap<String, PendingInvite> pendingOrganizationInvites) {
         this.pendingOrganizationInvites = pendingOrganizationInvites;
     }
 }

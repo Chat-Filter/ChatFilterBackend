@@ -1,9 +1,11 @@
 package net.chatfilter.chatfilterbackend.persistence.entity.user;
 
+import net.chatfilter.chatfilterbackend.persistence.entity.user.invite.PendingInvite;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +19,7 @@ public class User {
     private String name;
     private String lastName;
     private List<String> organizations;
-    private List<String> pendingOrganizationInvites;
+    private HashMap<String, PendingInvite> pendingOrganizationInvites;
 
     public User(String email, String encodedPassword, String name, String lastName) {
         this.email = email;
@@ -25,7 +27,7 @@ public class User {
         this.name = name;
         this.lastName = lastName;
         organizations = new ArrayList<>();
-        pendingOrganizationInvites = new ArrayList<>();
+        pendingOrganizationInvites = new HashMap<>();
     }
 
     public String getId() {
@@ -72,11 +74,11 @@ public class User {
         this.organizations = organizations;
     }
 
-    public List<String> getPendingOrganizationInvites() {
+    public HashMap<String, PendingInvite> getPendingOrganizationInvites() {
         return pendingOrganizationInvites;
     }
 
-    public void setPendingOrganizationInvites(List<String> pendingOrganizationInvites) {
+    public void setPendingOrganizationInvites(HashMap<String, PendingInvite> pendingOrganizationInvites) {
         this.pendingOrganizationInvites = pendingOrganizationInvites;
     }
 }
