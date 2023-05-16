@@ -4,20 +4,20 @@ import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 
 public class UpdateNameRequest {
 
-    private Key key;
+    private String key;
     private String organizationId, name;
 
-    public UpdateNameRequest(Key key, String organizationId, String name) {
+    public UpdateNameRequest(String key, String organizationId, String name) {
         this.key = key;
         this.organizationId = organizationId;
         this.name = name;
     }
 
-    public Key getKey() {
+    public String getKey() {
         return key;
     }
 
-    public void setKey(Key key) {
+    public void setKey(String key) {
         this.key = key;
     }
 

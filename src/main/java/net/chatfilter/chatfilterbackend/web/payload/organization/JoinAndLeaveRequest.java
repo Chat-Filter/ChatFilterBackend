@@ -4,19 +4,19 @@ import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 
 public class JoinAndLeaveRequest {
 
-    private Key key;
+    private String key;
     private String organizationId;
 
-    public JoinAndLeaveRequest(Key key, String organizationId) {
+    public JoinAndLeaveRequest(String key, String organizationId) {
         this.key = key;
         this.organizationId = organizationId;
     }
 
-    public Key getKey() {
+    public String getKey() {
         return key;
     }
 
-    public void setKey(Key key) {
+    public void setKey(String key) {
         this.key = key;
     }
 

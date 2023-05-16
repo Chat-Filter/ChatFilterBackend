@@ -6,6 +6,7 @@ import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.O
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class Organization {
     private String name;
     private HashMap<String, OrganizationMember> members;
     private HashMap<String, InvitedUser> pendingInvites;
-    private HashMap<LocalTime, Integer> checks;
+    private HashMap<LocalDate, Integer> checks;
     private Key key;
     private String planName;
 
@@ -31,6 +32,7 @@ public class Organization {
         this.members = new HashMap<>();
         this.pendingInvites = new HashMap<>();
         this.checks = new HashMap<>();
+        this.planName = "Beta";
     }
 
     public String getId() {
@@ -65,11 +67,11 @@ public class Organization {
         this.pendingInvites = pendingInvites;
     }
 
-    public HashMap<LocalTime, Integer> getChecks() {
+    public HashMap<LocalDate, Integer> getChecks() {
         return checks;
     }
 
-    public void setChecks(HashMap<LocalTime, Integer> checks) {
+    public void setChecks(HashMap<LocalDate, Integer> checks) {
         this.checks = checks;
     }
 

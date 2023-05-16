@@ -8,6 +8,7 @@ import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.M
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.OrganizationMember;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationPermission;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.role.OrganizationRole;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.statistics.StatisticsData;
 import net.chatfilter.chatfilterbackend.persistence.entity.user.User;
 import net.chatfilter.chatfilterbackend.persistence.entity.user.invite.PendingInvite;
 import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
@@ -19,6 +20,8 @@ import net.chatfilter.chatfilterbackend.web.security.user.UserSecurityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/organization")
@@ -55,6 +58,12 @@ public class OrganizationController {
         OrganizationRole role = organizationRoleService.getById(organization.getMembers().get(key.getBaseId()).getRole());
         if (!role.hasPermission(OrganizationPermission.SEE_STATISTICS)) {
             organization.setChecks(null);
+        } else {
+            LocalDate now = LocalDate.now();
+            if (!organization.getChecks().containsKey(now)) {
+                organization.getChecks().put(now, 0);
+                organizationService.update(organization);
+            }
         }
 
         return ResponseEntity.ok(organization);
@@ -63,7 +72,7 @@ public class OrganizationController {
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/update/name")
     public ResponseEntity<Organization> updateName(@RequestBody UpdateNameRequest request) {
-        Key key = request.getKey();
+        Key key = new Key(request.getKey());
         String organizationId = request.getOrganizationId();
         String name = request.getName();
 
@@ -163,7 +172,7 @@ public class OrganizationController {
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/join")
     public ResponseEntity<Organization> join(@RequestBody JoinAndLeaveRequest request) {
-        Key key = request.getKey();
+        Key key = new Key(request.getKey());
         String organizationId = request.getOrganizationId();
 
         if (!userSecurityManager.isValid(key)) {
@@ -194,7 +203,7 @@ public class OrganizationController {
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/leave")
     public ResponseEntity<UserDTO> leave(@RequestBody JoinAndLeaveRequest request) {
-        Key key = request.getKey();
+        Key key = new Key(request.getKey());
         String organizationId = request.getOrganizationId();
 
         if (!userSecurityManager.isValid(key)) {
@@ -208,6 +217,10 @@ public class OrganizationController {
 
         Organization organization = organizationService.getById(organizationId);
         if (organization == null) {
+            return ResponseEntity.status(403).build();
+        }
+
+        if (organization.getOwner().equals(user.getId())) {
             return ResponseEntity.status(403).build();
         }
 
@@ -251,8 +264,8 @@ public class OrganizationController {
 
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/delete")
-    public ResponseEntity delete(@RequestBody DeleteRequest request) {
-        Key key = request.getKey();
+    public ResponseEntity<UserDTO> delete(@RequestBody DeleteRequest request) {
+        Key key = new Key(request.getKey());
         String organizationId = request.getOrganizationId();
 
         if (!userSecurityManager.isValid(key)) {
@@ -276,7 +289,7 @@ public class OrganizationController {
         }
 
         organizationService.delete(organizationId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(userMapper.toUserDTO(user));
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
@@ -391,5 +404,34 @@ public class OrganizationController {
 
         String role = organizationRoleService.getById(organization.getMembers().get(memberId).getRole()).getName();
         return ResponseEntity.ok(new MemberData(target.getId(), target.getEmail(), target.getName(), target.getLastName(), role));
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/statistics-data")
+    public ResponseEntity<StatisticsData> getStatisticsData(String userKey, String organizationId) {
+        Key key = new Key(userKey);
+        if (!userSecurityManager.isValid(key)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userService.getById(key.getBaseId());
+        if (!user.getOrganizations().contains(organizationId)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Organization organization = organizationService.getById(organizationId);
+        OrganizationRole role = organizationRoleService.getById(organization.getMembers().get(key.getBaseId()).getRole());
+        if (!role.hasPermission(OrganizationPermission.SEE_STATISTICS)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        LocalDate now = LocalDate.now();
+        if (!organization.getChecks().containsKey(now)) {
+            organization.getChecks().put(now, 0);
+            organizationService.update(organization);
+        }
+
+        StatisticsData data = new StatisticsData(organizationId, now.toString(), 1000, organization.getChecks());
+        return ResponseEntity.ok(data);
     }
 }
