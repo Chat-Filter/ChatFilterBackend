@@ -3,6 +3,7 @@ package net.chatfilter.chatfilterbackend.web.controller.organization;
 import net.chatfilter.chatfilterbackend.domain.dto.UserDTO;
 import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.Organization;
+import net.chatfilter.chatfilterbackend.persistence.entity.organization.check.CheckResult;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.invite.InvitedUser;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.MemberData;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.member.OrganizationMember;
@@ -22,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/organization")
@@ -288,6 +290,12 @@ public class OrganizationController {
             userService.update(memberUser);
         }
 
+        for (String userId : organization.getPendingInvites().keySet()) {
+            User invitedUser = userService.getByEmail(userId);
+            invitedUser.getPendingOrganizationInvites().remove(organizationId);
+            userService.update(invitedUser);
+        }
+
         organizationService.delete(organizationId);
         return ResponseEntity.ok(userMapper.toUserDTO(user));
     }
@@ -433,5 +441,26 @@ public class OrganizationController {
 
         StatisticsData data = new StatisticsData(organizationId, now.toString(), 1000, organization.getChecks());
         return ResponseEntity.ok(data);
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/check")
+    public ResponseEntity<CheckResult> checkText(@RequestBody CheckRequest request) {
+        Key key = new Key(request.getApiKey());
+        Organization organization = organizationService.getByApiKey(key);
+
+        int maxDailyChecks = 0;
+        switch (organization.getPlanName().toLowerCase(Locale.ROOT)) {
+            case "beta" -> maxDailyChecks = 1000;
+        }
+
+        LocalDate now = LocalDate.now();
+        int checksToday = organization.getChecks().getOrDefault(now, 0);
+
+        if (checksToday >= maxDailyChecks) {
+            return ResponseEntity.status(403).build();
+        }
+
+        // TODO: Do check and return response
     }
 }

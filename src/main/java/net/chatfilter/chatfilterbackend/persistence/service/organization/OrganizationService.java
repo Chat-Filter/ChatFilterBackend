@@ -1,5 +1,6 @@
 package net.chatfilter.chatfilterbackend.persistence.service.organization;
 
+import net.chatfilter.chatfilterbackend.persistence.entity.Key;
 import net.chatfilter.chatfilterbackend.persistence.entity.organization.Organization;
 import net.chatfilter.chatfilterbackend.persistence.repository.OrganizationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,10 @@ public class OrganizationService {
 
     public Organization getById(String id) {
         return repository.findById(id).orElse(null);
+    }
+
+    public Organization getByApiKey(Key key) {
+        return repository.findByKey(key);
     }
 
     public Organization update(Organization organization) {
