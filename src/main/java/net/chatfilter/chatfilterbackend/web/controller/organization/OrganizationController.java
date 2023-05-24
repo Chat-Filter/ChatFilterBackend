@@ -16,6 +16,8 @@ import net.chatfilter.chatfilterbackend.persistence.mapper.UserMapper;
 import net.chatfilter.chatfilterbackend.persistence.service.organization.OrganizationService;
 import net.chatfilter.chatfilterbackend.persistence.service.organization.role.OrganizationRoleService;
 import net.chatfilter.chatfilterbackend.persistence.service.user.UserService;
+import net.chatfilter.chatfilterbackend.web.http.HTTPGet;
+import net.chatfilter.chatfilterbackend.web.http.HTTPGetResponse;
 import net.chatfilter.chatfilterbackend.web.payload.organization.*;
 import net.chatfilter.chatfilterbackend.web.security.user.UserSecurityManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RestController
 @RequestMapping("/organization")
@@ -443,9 +446,10 @@ public class OrganizationController {
         return ResponseEntity.ok(data);
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+
+    @CrossOrigin(origins = "http://localhost:63344")
     @PostMapping("/check")
-    public ResponseEntity<CheckResult> checkText(@RequestBody CheckRequest request) {
+    public ResponseEntity<AtomicReference<String>> checkText(@RequestBody CheckRequest request) {
         Key key = new Key(request.getApiKey());
         Organization organization = organizationService.getByApiKey(key);
 
@@ -461,6 +465,32 @@ public class OrganizationController {
             return ResponseEntity.status(403).build();
         }
 
-        // TODO: Do check and return response
+        AtomicReference<String> result = new AtomicReference<>();
+        HTTPGet call = new HTTPGet("http://127.0.0.1:5000/check?text=" + request.getText(), new HTTPGetResponse() {
+            @Override
+            public void onResponse(String response) {
+                result.set(response);
+            }
+
+            @Override
+            public void onError() {
+                System.out.println("Error on call");
+            }
+        });
+
+
+        call.execute();
+        while (result.get() == null) {
+            try {
+                Thread.sleep(500);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        checksToday++;
+        organization.getChecks().put(now, checksToday);
+        organizationService.update(organization);
+        return ResponseEntity.ok(result);
     }
 }
